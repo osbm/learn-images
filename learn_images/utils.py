@@ -1,4 +1,3 @@
-from PIL import Image
 import torch
 
 def generate_lin_space(image_size=(28, 28)):
