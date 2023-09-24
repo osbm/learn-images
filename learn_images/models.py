@@ -90,6 +90,7 @@ class PadeFeatures(nn.Module):
         """
         super().__init__()
         self.pade_order = pade_order
+        self.output_shape = pade_order*4
 
     def forward(self,x):
         orders = torch.arange(1, self.pade_order + 1).float().to(x.device)
