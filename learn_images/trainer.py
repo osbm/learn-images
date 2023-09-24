@@ -11,7 +11,7 @@ def train(image_path=None, output_folder=None, model=None, max_epochs=1000, earl
     criterion = torch.nn.MSELoss()
     model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
+    # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
 
     os.makedirs(output_folder, exist_ok=True)
 
@@ -52,7 +52,7 @@ def train(image_path=None, output_folder=None, model=None, max_epochs=1000, earl
         torch.nn.utils.clip_grad_norm_(model.parameters(), 0.01)
         optimizer.step()
         optimizer.zero_grad()
-        scheduler.step()
+        # scheduler.step()
 
         if epoch_idx % save_every == 0:
             output = output.detach().cpu().reshape(image_size)
