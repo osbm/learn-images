@@ -13,9 +13,9 @@ def train(image_path=None, output_folder=None, model=None, max_epochs=1000, earl
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
 
-    os.makedirs("output_folder", exist_ok=True)
+    os.makedirs(image_path, exist_ok=True)
 
-    target_tensor = Image.open("data/target.jpeg")
+    target_tensor = Image.open(image_path)
     target_tensor = np.array(target_tensor)
     target_tensor = torch.tensor(target_tensor)
     image_size = target_tensor.shape
