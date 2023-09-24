@@ -20,7 +20,7 @@ train(
     image_path="data/target.jpeg",
     output_folder="output_folder",
     model=model,
-    max_epochs=1000,
+    max_epochs=3000,
     early_stopping_patience=50,
     save_every=5
 )

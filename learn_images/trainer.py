@@ -5,8 +5,13 @@ import numpy as np
 from tqdm import tqdm
 from .utils import generate_lin_space
 
+def set_seed(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
 
-def train(image_path=None, output_folder=None, model=None, max_epochs=1000, early_stopping_patience=50, save_every=5):
+def train(image_path=None, output_folder=None, model=None, max_epochs=1000, early_stopping_patience=50, save_every=5, seed=42):
+    set_seed(seed)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     criterion = torch.nn.MSELoss()
     model.to(device)
