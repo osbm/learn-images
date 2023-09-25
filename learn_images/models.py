@@ -13,6 +13,10 @@ class SimpleMLP(nn.Module):
     """
     def __init__(self, hidden_size=100, num_hidden_layers=7, init_size=2, output_size=1):
         super().__init__()
+        self.hidden_size = hidden_size
+        self.num_hidden_layers = num_hidden_layers
+        self.output_size = output_size
+        self.init_size = init_size
         layers = [
             nn.Linear(init_size, hidden_size),
             nn.ReLU()
@@ -31,6 +35,11 @@ class SkipConnectionsMLP(nn.Module):
     def __init__(self, hidden_size=100, num_hidden_layers=7, init_size=2, output_size=3):
         super().__init__()
 
+        self.hidden_size = hidden_size
+        self.num_hidden_layers = num_hidden_layers
+        self.output_size = output_size
+        self.init_size = init_size
+        
         self.inLayer = nn.Linear(init_size, hidden_size)
         self.relu = nn.LeakyReLU()
         hidden = []
