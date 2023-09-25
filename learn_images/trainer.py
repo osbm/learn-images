@@ -94,7 +94,7 @@ def train(
         optimizer.step()
         optimizer.zero_grad()
         if scheduler:
-            scheduler.step()
+            scheduler.step(loss)
 
         if epoch_idx % save_every == 0:
             output = output.detach().cpu().reshape(image_size)

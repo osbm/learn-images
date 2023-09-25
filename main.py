@@ -18,10 +18,11 @@ model = SimpleMLP(
 )
 # model = nn.Sequential(feature_extractor, model)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
+# scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10, verbose=True)
 
 train(
-    experiment_name="debug2",
+    experiment_name="reduce_lr_on_plateau",
     image_path="data/target.jpeg",
     output_folder="output_folder",
     model=model,
