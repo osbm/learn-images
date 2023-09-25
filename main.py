@@ -8,7 +8,7 @@ import torch
 # feature_extractor = FourierFeatues(fourier_order=4)
 feature_extractor = Fourier2DFeatures(fourier_order=4)
 model = SkipConnectionsMLP(
-    hidden_size=10,
+    hidden_size=100,
     num_hidden_layers=7,
 #     init_size=2,
     init_size=feature_extractor.output_shape,
