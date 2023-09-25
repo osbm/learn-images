@@ -11,12 +11,13 @@ class SimpleMLP(nn.Module):
     init_size (float): number of parameters in input layer
     output_size (float): number of parameters in output layer
     """
-    def __init__(self, hidden_size=100, num_hidden_layers=7, init_size=2, output_size=1):
+    def __init__(self, hidden_size=100, num_hidden_layers=7, init_size=2, output_size=1, output_activation="tanh"):
         super().__init__()
         self.hidden_size = hidden_size
         self.num_hidden_layers = num_hidden_layers
         self.output_size = output_size
         self.init_size = init_size
+        self.output_activation = output_activation
         layers = [
             nn.Linear(init_size, hidden_size),
             nn.ReLU()
@@ -29,16 +30,20 @@ class SimpleMLP(nn.Module):
 
     def forward(self,x):
         x = self.seq(x)
-        return torch.sigmoid(x)
+        if self.output_activation == "sigmoid":
+            return torch.sigmoid(x)
+        elif self.output_activation == "tanh":
+            return (torch.tanh(x)+1)/2
 
 class SkipConnectionsMLP(nn.Module):
-    def __init__(self, hidden_size=100, num_hidden_layers=7, init_size=2, output_size=3):
+    def __init__(self, hidden_size=100, num_hidden_layers=7, init_size=2, output_size=3, output_activation="tanh"):
         super().__init__()
 
         self.hidden_size = hidden_size
         self.num_hidden_layers = num_hidden_layers
         self.output_size = output_size
         self.init_size = init_size
+        self.output_activation = output_activation
         
         self.inLayer = nn.Linear(init_size, hidden_size)
         self.relu = nn.LeakyReLU()
@@ -57,8 +62,10 @@ class SkipConnectionsMLP(nn.Module):
             previous = current
             current = self.relu(layer(combined))
         y = self.outLayer(torch.cat([current, previous, x], 1))
-        return (torch.tanh(y)+1)/2 # hey I think this works slightly better
-        # return self.sig(y)
+        if self.output_activation == "sigmoid":
+            return torch.sigmoid(x)
+        elif self.output_activation == "tanh":
+            return (torch.tanh(x)+1)/2
 
 class FourierFeatues(nn.Module):
     def __init__(self, fourier_order=4):

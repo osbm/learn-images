@@ -29,9 +29,11 @@ def train(
         model_name = f"{model[0].__class__.__name__}_{model[1].__class__.__name__}_order_{model[0].fourier_order}"
         num_hidden_layers = model[1].num_hidden_layers
         hidden_size = model[1].hidden_size
+        output_activation = model[1].output_activation
     else:
         num_hidden_layers = model.num_hidden_layers
         hidden_size = model.hidden_size
+        output_activation = model.output_activation
 
 
     wandb.init(
@@ -45,6 +47,7 @@ def train(
             "model_name": model_name,
             "model_num_hidden_layers": num_hidden_layers,
             "model_hidden_size": hidden_size,
+            "model_output_activation": output_activation,
             "optimizer": optimizer.__class__.__name__,
             "optimizer_config": optimizer.state_dict()["param_groups"],
             "scheduler": scheduler.__class__.__name__,
