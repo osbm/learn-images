@@ -65,11 +65,11 @@ class FourierFeatues(nn.Module):
         num_hidden_layers (float): number of hidden layers (SkipConn)
         """
         super().__init__()
-        self.fourier_order = fourier_order
+        self.order = fourier_order
         self.output_shape = fourier_order*4 + 2
 
     def forward(self,x):
-        orders = torch.arange(1, self.fourier_order + 1).float().to(x.device)
+        orders = torch.arange(1, self.order + 1).float().to(x.device)
         x = x.unsqueeze(-1)  # add an extra dimension for broadcasting
         fourier_features = torch.cat([torch.sin(orders * x), torch.cos(orders * x), x], dim=-1)
         fourier_features = fourier_features.view(x.shape[0], -1)  # flatten the last two dimensions
@@ -89,11 +89,11 @@ class PadeFeatures(nn.Module):
         num_hidden_layers (float): number of hidden layers (SkipConn)
         """
         super().__init__()
-        self.pade_order = pade_order
+        self.order = pade_order
         self.output_shape = pade_order*4
 
     def forward(self,x):
-        orders = torch.arange(1, self.pade_order + 1).float().to(x.device)
+        orders = torch.arange(1, self.order + 1).float().to(x.device)
         x = x.unsqueeze(-1)  # add an extra dimension for broadcasting
         pade_features = torch.cat([(x**2 + orders), (x**2 + orders + 1)], dim=-1)
         pade_features = pade_features.view(x.shape[0], -1)  # flatten the last two dimensions
@@ -103,11 +103,11 @@ class PadeFeatures(nn.Module):
 class Fourier2DFeatures(nn.Module):
     def __init__(self, fourier_order=4):
         super().__init__()
-        self.fourier_order = fourier_order
+        self.order = fourier_order
         self.output_shape = (fourier_order*fourier_order*4) + 2
 
     def forward(self,x):
-        orders = torch.arange(0, self.fourier_order).float().to(x.device)
+        orders = torch.arange(0, self.order).float().to(x.device)
         features = [x]
         for n in orders:
             for m in orders:

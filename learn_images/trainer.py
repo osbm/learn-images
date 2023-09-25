@@ -16,6 +16,8 @@ def train(
     image_path=None,
     output_folder=None,
     model=None,
+    optimizer=None,
+    scheduler=None,
     max_epochs=1000,
     early_stopping_patience=50,
     save_every=5,
@@ -24,7 +26,13 @@ def train(
     set_seed(seed)
     model_name = model.__class__.__name__
     if model_name == "Sequential":
-        model_name = f"{model[0].__class__.__name__}_{model[1].__class__.__name__}"
+        model_name = f"{model[0].__class__.__name__}_{model[1].__class__.__name__}_order_{model[0].fourier_order}"
+        num_hidden_layers = model[1].num_hidden_layers
+        hidden_size = model[1].hidden_size
+    else:
+        num_hidden_layers = model.num_hidden_layers
+        hidden_size = model.hidden_size
+
 
     wandb.init(
         project="learn-images",
@@ -35,15 +43,18 @@ def train(
             "save_every": save_every,
             "seed": seed,
             "model_name": model_name,
+            "model_num_hidden_layers": num_hidden_layers,
+            "model_hidden_size": hidden_size,
+            "optimizer": optimizer.__class__.__name__,
+            "optimizer_config": optimizer.state_dict()["param_groups"],
+            "scheduler": scheduler.__class__.__name__,
+            "scheduler_config": scheduler.state_dict() if scheduler else None,
         }
     )
-
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     criterion = torch.nn.MSELoss()
     model.to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-    # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
 
     os.makedirs(output_folder, exist_ok=True)
 
@@ -56,12 +67,10 @@ def train(
     target_tensor = target_tensor.reshape(-1, image_size[2])
     target_tensor = target_tensor.to(device)
 
-    # print(target_tensor.shape)
     linear_space = generate_lin_space(image_size=image_size)
     linear_space = linear_space.to(device)
     frame = 0
 
-    # all_losses = []
     best_loss = float('inf')
     consecutive_epochs_no_improvement = 0
     max_consecutive_epochs_no_improvement = early_stopping_patience  # Set the threshold for early stopping
@@ -80,12 +89,12 @@ def train(
 
 
         print(f"Epoch {epoch_idx} loss: {loss}")
-        wandb.log({"loss": loss})
-        # all_losses.append(loss)
+        wandb.log({"loss": loss, "learning_rate": optimizer.param_groups[0]['lr']})
         torch.nn.utils.clip_grad_norm_(model.parameters(), 0.01)
         optimizer.step()
         optimizer.zero_grad()
-        # scheduler.step()
+        if scheduler:
+            scheduler.step()
 
         if epoch_idx % save_every == 0:
             output = output.detach().cpu().reshape(image_size)
@@ -93,7 +102,7 @@ def train(
             output = output.to(torch.uint8)
             output = Image.fromarray(output.numpy())
             output.save(f"output_folder/{frame}.png")
-            wandb.log({"output": wandb.Image(output), "frame": frame})
+            wandb.log({"output": wandb.Image(output)})
             print(f"Saved frame {frame}")
             frame += 1
 
