@@ -52,7 +52,7 @@ class SkipConnectionsMLP(nn.Module):
             in_size = hidden_size*2 + init_size if i>0 else hidden_size + init_size
             hidden.append(nn.Linear(in_size, hidden_size))
         self.hidden = nn.ModuleList(hidden)
-        self.outLayer = nn.Linear(hidden_size*2+init_size, 3)
+        self.outLayer = nn.Linear(hidden_size*2+init_size, output_size)
 
     def forward(self, x):
         current = self.relu(self.inLayer(x))
@@ -61,7 +61,7 @@ class SkipConnectionsMLP(nn.Module):
             combined = torch.cat([current, previous, x], 1)
             previous = current
             current = self.relu(layer(combined))
-        y = self.outLayer(torch.cat([current, previous, x], 1))
+        x = self.outLayer(torch.cat([current, previous, x], 1))
         if self.output_activation == "sigmoid":
             return torch.sigmoid(x)
         elif self.output_activation == "tanh":

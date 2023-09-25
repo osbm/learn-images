@@ -21,7 +21,8 @@ def train(
     max_epochs=1000,
     early_stopping_patience=50,
     save_every=5,
-    seed=42
+    seed=42,
+    disable_wandb=False,
 ):
     set_seed(seed)
     model_name = model.__class__.__name__
@@ -52,7 +53,8 @@ def train(
             "optimizer_config": optimizer.state_dict()["param_groups"],
             "scheduler": scheduler.__class__.__name__,
             "scheduler_config": scheduler.state_dict() if scheduler else None,
-        }
+        },
+        mode="disabled" if disable_wandb else None,
     )
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -114,8 +116,4 @@ def train(
             break
 
     wandb.finish()
-    # save all losses to a txt file
-    # with open("output_folder/losses.txt", "w") as f:
-    #     for loss in all_losses:
-    #         f.write(f"{loss}\n")
         
