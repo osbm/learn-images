@@ -26,7 +26,7 @@ def train(
     set_seed(seed)
     model_name = model.__class__.__name__
     if model_name == "Sequential":
-        model_name = f"{model[0].__class__.__name__}_{model[1].__class__.__name__}_order_{model[0].fourier_order}"
+        model_name = f"{model[0].__class__.__name__}_{model[1].__class__.__name__}_order_{model[0].order}"
         num_hidden_layers = model[1].num_hidden_layers
         hidden_size = model[1].hidden_size
         output_activation = model[1].output_activation
