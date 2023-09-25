@@ -4,14 +4,41 @@ import os
 import numpy as np
 from tqdm import tqdm
 from .utils import generate_lin_space
+import wandb
 
 def set_seed(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     np.random.seed(seed)
 
-def train(image_path=None, output_folder=None, model=None, max_epochs=1000, early_stopping_patience=50, save_every=5, seed=42):
+def train(
+    experiment_name="debug",
+    image_path=None,
+    output_folder=None,
+    model=None,
+    max_epochs=1000,
+    early_stopping_patience=50,
+    save_every=5,
+    seed=42
+):
     set_seed(seed)
+    model_name = model.__class__.__name__
+    if model_name == "Sequential":
+        model_name = f"{model[0].__class__.__name__}_{model[1].__class__.__name__}"
+
+    wandb.init(
+        project="learn-images",
+        name=experiment_name,
+        config={
+            "max_epochs": max_epochs,
+            "early_stopping_patience": early_stopping_patience,
+            "save_every": save_every,
+            "seed": seed,
+            "model_name": model_name,
+        }
+    )
+
+
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     criterion = torch.nn.MSELoss()
     model.to(device)
@@ -34,7 +61,7 @@ def train(image_path=None, output_folder=None, model=None, max_epochs=1000, earl
     linear_space = linear_space.to(device)
     frame = 0
 
-    all_losses = []
+    # all_losses = []
     best_loss = float('inf')
     consecutive_epochs_no_improvement = 0
     max_consecutive_epochs_no_improvement = early_stopping_patience  # Set the threshold for early stopping
@@ -53,7 +80,8 @@ def train(image_path=None, output_folder=None, model=None, max_epochs=1000, earl
 
 
         print(f"Epoch {epoch_idx} loss: {loss}")
-        all_losses.append(loss)
+        wandb.log({"loss": loss})
+        # all_losses.append(loss)
         torch.nn.utils.clip_grad_norm_(model.parameters(), 0.01)
         optimizer.step()
         optimizer.zero_grad()
@@ -65,6 +93,7 @@ def train(image_path=None, output_folder=None, model=None, max_epochs=1000, earl
             output = output.to(torch.uint8)
             output = Image.fromarray(output.numpy())
             output.save(f"output_folder/{frame}.png")
+            wandb.log({"output": wandb.Image(output), "frame": frame})
             print(f"Saved frame {frame}")
             frame += 1
 
@@ -72,9 +101,9 @@ def train(image_path=None, output_folder=None, model=None, max_epochs=1000, earl
             print(f"Stopping early as loss hasn't improved for {max_consecutive_epochs_no_improvement} consecutive epochs.")
             break
 
-
+    wandb.finish()
     # save all losses to a txt file
-    with open("output_folder/losses.txt", "w") as f:
-        for loss in all_losses:
-            f.write(f"{loss}\n")
+    # with open("output_folder/losses.txt", "w") as f:
+    #     for loss in all_losses:
+    #         f.write(f"{loss}\n")
         

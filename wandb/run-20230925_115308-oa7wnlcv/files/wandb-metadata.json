@@ -1,0 +1,88 @@
+{
+    "os": "Linux-6.1.53-1-MANJARO-x86_64-with-glibc2.38",
+    "python": "3.10.11",
+    "heartbeatAt": "2023-09-25T08:53:18.785966",
+    "startedAt": "2023-09-25T08:53:08.042518",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/home/osman/Documents/GitHub/learn-images/main.py",
+    "codePathLocal": "main.py",
+    "codePath": "main.py",
+    "git": {
+        "remote": "https://github.com/osbm/learn-images.git",
+        "commit": "5b61869acfa5ed4b63694ad00841588c48f494a4"
+    },
+    "email": "osmanfbayram@gmail.com",
+    "root": "/home/osman/Documents/GitHub/learn-images",
+    "host": "volkan",
+    "username": "osman",
+    "executable": "/home/osman/Documents/GitHub/learn-images/.venv/bin/python",
+    "cpu_count": 4,
+    "cpu_count_logical": 8,
+    "cpu_freq": {
+        "current": 1363.5865,
+        "min": 400.0,
+        "max": 3900.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 1356.247,
+            "min": 400.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1366.719,
+            "min": 400.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1366.086,
+            "min": 400.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1138.417,
+            "min": 400.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1321.277,
+            "min": 400.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1333.864,
+            "min": 400.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1398.192,
+            "min": 400.0,
+            "max": 3900.0
+        },
+        {
+            "current": 943.648,
+            "min": 400.0,
+            "max": 3900.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 254.1355438232422,
+            "used": 223.3356475830078
+        }
+    },
+    "gpu": "NVIDIA GeForce MX250",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA GeForce MX250",
+            "memory_total": 4294967296
+        }
+    ],
+    "memory": {
+        "total": 15.411075592041016
+    }
+}
