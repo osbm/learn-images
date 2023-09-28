@@ -67,7 +67,8 @@ class SkipConnectionsMLP(nn.Module):
         elif self.output_activation == "tanh":
             return (torch.tanh(x)+1)/2
 
-class FourierFeatues(nn.Module):
+
+class FourierFeatures(nn.Module):
     def __init__(self, fourier_order=4):
         """ 
         Linear torch model that adds Fourier Features to the initial input x as \
@@ -133,3 +134,15 @@ class Fourier2DFeatures(nn.Module):
                 features.append((torch.sin(n*x[:,0])*torch.sin(m*x[:,1])).unsqueeze(-1))
         fourier_features = torch.cat(features, 1)
         return fourier_features
+
+class GaussianFourierMapping():
+    def __init__(self, mapping_size=256, scale=10):
+        self.mapping_size = mapping_size
+        self.scale = scale
+        self.B = torch.normal(0, 1, size=(mapping_size, 2)) * scale
+        self.order = mapping_size
+
+    def __call__(self, x):
+        B = self.B.to(x.device)
+        x_proj = (2.*torch.pi*x) @ B.T
+        return torch.cat([torch.sin(x_proj), torch.cos(x_proj)], dim=-1)
