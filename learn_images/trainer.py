@@ -39,7 +39,7 @@ def train(
             "feature_extractor_order": feature_extractor.order if feature_extractor else None,
             "model_name": model.__class__.__name__,
             "model_num_hidden_layers": model.num_hidden_layers,
-            "model_hidden_size": model.num_hidden_layers,
+            "model_hidden_size": model.hidden_size,
             "model_output_activation": model.output_activation,
             "optimizer": optimizer.__class__.__name__,
             "optimizer_config": optimizer.state_dict()["param_groups"],
