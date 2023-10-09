@@ -151,7 +151,7 @@ class GaussianFourierMapping():
 
 
 class CorrectFourierFeatures(nn.Module):
-    def __init__(self, fourier_order=4, flatten_features=True):
+    def __init__(self, fourier_order=4, flatten_features=True, exponential_increase=False):
         """ 
         Linear torch model that adds Fourier Features to the initial input x as \
         sin(x) + cos(x), sin(2x) + cos(2x), sin(3x) + cos(3x), ...
@@ -167,9 +167,13 @@ class CorrectFourierFeatures(nn.Module):
         self.order = fourier_order
         self.flatten_features = flatten_features
         self.num_features_per_channel = fourier_order * 2 # for one sine and one cosine
+        self.exponential_increase = exponential_increase
 
     def forward(self,x):
         orders = torch.arange(1, self.order + 1).float().to(x.device)
+        if self.exponential_increase:
+            orders *= orders
+
         x = x.unsqueeze(-1)  # add an extra dimension for broadcasting
         sinus = torch.sin(2 * torch.pi * orders * x)
         cosinus = torch.cos(2 * torch.pi * orders * x)

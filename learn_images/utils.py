@@ -16,10 +16,9 @@ def generate_lin_space(image_size=(28, 28), flatten_xy=False):
 
     return grid
 
-def get_target_tensor(file_path: str="data/target.jpeg", map_between_minus_one_and_one: bool=False, flatten_xy: bool=False):
+def get_target_tensor(file_path: str="data/target.jpeg", map_between_minus_one_and_one: bool=False, flatten_xy: bool=False, also_return_image_size: bool=False):
     target_tensor = Image.open(file_path)
-    target_tensor = np.array(target_tensor)
-    target_tensor = torch.tensor(target_tensor)
+    target_tensor = torch.from_numpy(np.array(target_tensor))
     image_size = target_tensor.shape
     target_tensor = target_tensor.float()
     target_tensor = target_tensor / 255
@@ -30,7 +29,10 @@ def get_target_tensor(file_path: str="data/target.jpeg", map_between_minus_one_a
     if flatten_xy:
         target_tensor = target_tensor.flatten(0, 1)
 
-    return target_tensor
+    if also_return_image_size:
+        return target_tensor, image_size
+    else:
+        return target_tensor
 
 def set_seed(seed):
     torch.manual_seed(seed)

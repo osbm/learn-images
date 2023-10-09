@@ -50,8 +50,7 @@ def train(
 
     os.makedirs(output_folder, exist_ok=True)
 
-    target_tensor = get_target_tensor(file_path=image_path)
-    image_size = target_tensor.shape
+    target_tensor, image_size = get_target_tensor(file_path=image_path, also_return_image_size=True)
 
     linear_space = generate_lin_space(image_size=image_size)
     frame = 0
