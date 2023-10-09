@@ -1,6 +1,5 @@
 import torch
 from torch import nn
-from icecream import ic
 
 class SimpleMLP(nn.Module):
     """ 
