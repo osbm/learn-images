@@ -17,7 +17,7 @@ def generate_lin_space(image_size=(28, 28), flatten_xy=False):
     return grid
 
 def get_target_tensor(file_path: str="data/target.jpeg", map_between_minus_one_and_one: bool=False, flatten_xy: bool=False):
-    target_tensor = Image.open("data/target.jpeg")
+    target_tensor = Image.open(file_path)
     target_tensor = np.array(target_tensor)
     target_tensor = torch.tensor(target_tensor)
     image_size = target_tensor.shape
