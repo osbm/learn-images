@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+from icecream import ic
 
 class SimpleMLP(nn.Module):
     """ 
@@ -146,3 +147,27 @@ class GaussianFourierMapping():
         B = self.B.to(x.device)
         x_proj = (2.*torch.pi*x) @ B.T
         return torch.cat([torch.sin(x_proj), torch.cos(x_proj)], dim=-1)
+
+
+class CorrectFourierFeatures(nn.Module):
+    def __init__(self, fourier_order=4):
+        """ 
+        Linear torch model that adds Fourier Features to the initial input x as \
+        sin(x) + cos(x), sin(2x) + cos(2x), sin(3x) + cos(3x), ...
+        
+
+        Parameters: 
+        fourier_order (int): number fourier features to use. Each addition adds 4x\
+         parameters to each layer.
+        hidden_size (float): number of non-skip parameters per hidden layer (SkipConn)
+        num_hidden_layers (float): number of hidden layers (SkipConn)
+        """
+        super().__init__()
+        self.order = fourier_order
+
+    def forward(self,x):
+        orders = torch.arange(1, self.order + 1).float().to(x.device)
+        x = x.unsqueeze(-1)  # add an extra dimension for broadcasting
+        sinus = torch.sin(2 * torch.pi * orders * x)
+        cosinus = torch.cos(2 * torch.pi * orders * x)
+        return torch.cat([sinus, cosinus], dim=-1)
