@@ -32,5 +32,7 @@ def get_target_tensor(file_path: str="data/target.jpeg", map_between_minus_one_a
 
     return target_tensor
 
-
-
+def set_seed(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)

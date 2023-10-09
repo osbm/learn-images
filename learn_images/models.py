@@ -69,7 +69,7 @@ class SkipConnectionsMLP(nn.Module):
 
 
 class FourierFeatures(nn.Module):
-    def __init__(self, fourier_order=4):
+    def __init__(self, fourier_order=4, flatten_features=True):
         """ 
         Linear torch model that adds Fourier Features to the initial input x as \
         sin(x) + cos(x), sin(2x) + cos(2x), sin(3x) + cos(3x), ...
@@ -84,12 +84,14 @@ class FourierFeatures(nn.Module):
         super().__init__()
         self.order = fourier_order
         self.output_shape = fourier_order*4 + 2
+        self.flatten_features = flatten_features
 
     def forward(self,x):
         orders = torch.arange(1, self.order + 1).float().to(x.device)
         x = x.unsqueeze(-1)  # add an extra dimension for broadcasting
         fourier_features = torch.cat([torch.sin(orders * x), torch.cos(orders * x), x], dim=-1)
         fourier_features = fourier_features.view(x.shape[0], -1)  # flatten the last two dimensions
+
         return fourier_features
 
 class PadeFeatures(nn.Module):
@@ -149,7 +151,7 @@ class GaussianFourierMapping():
 
 
 class CorrectFourierFeatures(nn.Module):
-    def __init__(self, fourier_order=4):
+    def __init__(self, fourier_order=4, flatten_features=True):
         """ 
         Linear torch model that adds Fourier Features to the initial input x as \
         sin(x) + cos(x), sin(2x) + cos(2x), sin(3x) + cos(3x), ...
@@ -163,10 +165,17 @@ class CorrectFourierFeatures(nn.Module):
         """
         super().__init__()
         self.order = fourier_order
+        self.flatten_features = flatten_features
+        self.num_features_per_channel = fourier_order * 2 # for one sine and one cosine
 
     def forward(self,x):
         orders = torch.arange(1, self.order + 1).float().to(x.device)
         x = x.unsqueeze(-1)  # add an extra dimension for broadcasting
         sinus = torch.sin(2 * torch.pi * orders * x)
         cosinus = torch.cos(2 * torch.pi * orders * x)
-        return torch.cat([sinus, cosinus], dim=-1)
+        features =  torch.cat([sinus, cosinus], dim=-1)
+
+        if self.flatten_features:
+            features = features.flatten(-2, -1)
+
+        return features

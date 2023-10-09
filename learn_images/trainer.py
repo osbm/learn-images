@@ -3,13 +3,9 @@ from PIL import Image
 import os
 import numpy as np
 from tqdm import tqdm
-from .utils import generate_lin_space
+from .utils import generate_lin_space, get_target_tensor, set_seed
 import wandb
 
-def set_seed(seed):
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    np.random.seed(seed)
 
 def train(
     experiment_name="debug",
@@ -51,29 +47,29 @@ def train(
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     criterion = torch.nn.MSELoss()
-    model.to(device)
 
     os.makedirs(output_folder, exist_ok=True)
 
-    target_tensor = Image.open(image_path)
-    target_tensor = np.array(target_tensor)
-    target_tensor = torch.tensor(target_tensor)
+    target_tensor = get_target_tensor(file_path=image_path)
     image_size = target_tensor.shape
-    target_tensor = target_tensor.float()
-    target_tensor = target_tensor / 255
-    target_tensor = target_tensor.reshape(-1, image_size[2])
-    target_tensor = target_tensor.to(device)
 
     linear_space = generate_lin_space(image_size=image_size)
-    linear_space = linear_space.to(device)
     frame = 0
 
-    if feature_extractor:
+    if feature_extractor is not None:
         linear_space = feature_extractor(linear_space)
+
+    target_tensor = target_tensor.flatten(0, 1)
+    linear_space = linear_space.flatten(0, 1)
 
     best_loss = float('inf')
     consecutive_epochs_no_improvement = 0
     max_consecutive_epochs_no_improvement = early_stopping_patience  # Set the threshold for early stopping
+
+    # move stuff to device
+    target_tensor = target_tensor.to(device)
+    linear_space = linear_space.to(device)
+    model.to(device)
 
     for epoch_idx in range(max_epochs):
         output = model(linear_space)
@@ -111,4 +107,3 @@ def train(
             break
 
     wandb.finish()
-        
