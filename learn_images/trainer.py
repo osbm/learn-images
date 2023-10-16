@@ -32,7 +32,6 @@ def train(
             "save_every": save_every,
             "seed": seed,
             "feature_extractor": feature_extractor.__class__.__name__ if feature_extractor else None,
-            "feature_extractor_order": feature_extractor.order if feature_extractor else None,
             "model_name": model.__class__.__name__,
             "model_num_hidden_layers": model.num_hidden_layers,
             "model_hidden_size": model.hidden_size,
