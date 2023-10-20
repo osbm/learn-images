@@ -26,5 +26,4 @@ train(
     max_epochs=1000,
     early_stopping_patience=50,
     save_every=1,
-    disable_wandb=True,
 )
