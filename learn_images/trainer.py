@@ -5,9 +5,9 @@ import numpy as np
 from tqdm import tqdm
 from .utils import generate_lin_space, get_target_tensor, set_seed
 import wandb
+from .datasets import ImageDataset, VideoDataset
 
-
-def train(
+def train_image_model(
     experiment_name="debug",
     image_path=None,
     output_folder=None,
@@ -92,6 +92,94 @@ def train(
             wandb.log({"output": wandb.Image(output)})
             print(f"Saved frame {frame}")
             frame += 1
+
+        if consecutive_epochs_no_improvement >= max_consecutive_epochs_no_improvement:
+            print(f"Stopping early as loss hasn't improved for {max_consecutive_epochs_no_improvement} consecutive epochs.")
+            break
+
+    wandb.finish()
+
+
+def train_video_model(
+    experiment_name="debug",
+    frames_folder_path=None,
+    output_folder=None,
+    model=None,
+    feature_extractor=None,
+    optimizer=None,
+    scheduler=None,
+    max_epochs=1000,
+    early_stopping_patience=50,
+    save_every=5,
+    seed=42,
+    disable_wandb=False,
+):
+    set_seed(seed)
+
+    wandb.init(
+        project="learn-images",
+        name=experiment_name,
+        config={
+            "max_epochs": max_epochs,
+            "early_stopping_patience": early_stopping_patience,
+            "save_every": save_every,
+            "seed": seed,
+            "model_name": model.__class__.__name__,
+            "optimizer": optimizer.__class__.__name__,
+            "optimizer_config": optimizer.state_dict()["param_groups"],
+            "scheduler": scheduler.__class__.__name__,
+            "scheduler_config": scheduler.state_dict() if scheduler else None,
+        },
+        mode="disabled" if disable_wandb else None,
+    )
+
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    criterion = torch.nn.MSELoss()
+
+    os.makedirs(output_folder, exist_ok=True)
+
+    dataset = VideoDataset(images_folder=frames_folder_path, convert_to="L")
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True)
+
+    best_loss = float('inf')
+    consecutive_epochs_no_improvement = 0
+    max_consecutive_epochs_no_improvement = early_stopping_patience  # Set the threshold for early stopping
+
+    # move stuff to device
+    model.to(device)
+
+    for epoch_idx in range(max_epochs):
+        losses = []
+        for x, y in tqdm(dataloader):
+            x, y = x.to(device), y.to(device)
+
+            output = model(x)
+
+            loss = criterion(output, y)
+
+            loss.backward()
+            loss = loss.item()
+
+            optimizer.step()
+            optimizer.zero_grad()
+            if scheduler:
+                scheduler.step(loss)
+            # torch.nn.utils.clip_grad_norm_(model.parameters(), 0.01)
+
+            losses.append(loss)
+            wandb.log({"loss": loss, "learning_rate": optimizer.param_groups[0]['lr']})
+            if loss < best_loss:
+                best_loss = loss
+                consecutive_epochs_no_improvement = 0
+            else:
+                consecutive_epochs_no_improvement += 1
+        epoch_loss = np.mean(losses)
+        print(f"Epoch {epoch_idx} loss: {epoch_loss}")
+        wandb.log({"epoch_loss": epoch_loss})
+        
+        if epoch_idx % save_every == 0:
+            print("TODO")
+            
 
         if consecutive_epochs_no_improvement >= max_consecutive_epochs_no_improvement:
             print(f"Stopping early as loss hasn't improved for {max_consecutive_epochs_no_improvement} consecutive epochs.")
