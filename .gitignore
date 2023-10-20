@@ -3,3 +3,6 @@
 data/
 output_folder
 wandb
+build/
+learn_images.egg-info/
+__pycache__/
