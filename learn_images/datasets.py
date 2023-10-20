@@ -51,8 +51,11 @@ class VideoDataset(torch.utils.data.Dataset):
         # frame id is normalized between 0 and 1
         image_path = self.images[idx]
         image = load_image(image_path, convert_to=self.convert_to)
+        image = image.to(torch.float32)
+
 
         input_tensor = idx / self.len
         input_tensor = torch.tensor(input_tensor, dtype=torch.float32)
+        input_tensor = input_tensor.unsqueeze(-1)
         return input_tensor, image
 

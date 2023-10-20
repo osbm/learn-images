@@ -152,11 +152,8 @@ def train_video_model(
         losses = []
         for x, y in tqdm(dataloader):
             x, y = x.to(device), y.to(device)
-
             output = model(x)
-
             loss = criterion(output, y)
-
             loss.backward()
             loss = loss.item()
 
