@@ -13,6 +13,8 @@ model = SimpleMLP(
     output_activation="sigmoid"
 )
 
+model = torch.nn.Sequential(feature_extractor, model)
+
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 train(
@@ -20,7 +22,6 @@ train(
     image_path="data/target.jpeg",
     output_folder="output_folder",
     model=model,
-    feature_extractor=feature_extractor,
     optimizer=optimizer,
     max_epochs=1000,
     early_stopping_patience=50,

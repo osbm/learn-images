@@ -31,11 +31,7 @@ def train(
             "early_stopping_patience": early_stopping_patience,
             "save_every": save_every,
             "seed": seed,
-            "feature_extractor": feature_extractor.__class__.__name__ if feature_extractor else None,
             "model_name": model.__class__.__name__,
-            "model_num_hidden_layers": model.num_hidden_layers,
-            "model_hidden_size": model.hidden_size,
-            "model_output_activation": model.output_activation,
             "optimizer": optimizer.__class__.__name__,
             "optimizer_config": optimizer.state_dict()["param_groups"],
             "scheduler": scheduler.__class__.__name__,
@@ -53,9 +49,6 @@ def train(
 
     linear_space = generate_lin_space(image_size=image_size)
     frame = 0
-
-    if feature_extractor is not None:
-        linear_space = feature_extractor(linear_space)
 
     target_tensor = target_tensor.flatten(0, 1)
     linear_space = linear_space.flatten(0, 1)
