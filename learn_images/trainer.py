@@ -105,13 +105,13 @@ def train_video_model(
     frames_folder_path=None,
     output_folder=None,
     model=None,
-    feature_extractor=None,
     optimizer=None,
     scheduler=None,
     max_epochs=1000,
     early_stopping_patience=50,
     save_every=5,
     seed=42,
+    batch_size=32,
     disable_wandb=False,
 ):
     set_seed(seed)
@@ -139,7 +139,7 @@ def train_video_model(
     os.makedirs(output_folder, exist_ok=True)
 
     dataset = VideoDataset(images_folder=frames_folder_path, convert_to="L")
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     best_loss = float('inf')
     consecutive_epochs_no_improvement = 0
@@ -153,26 +153,29 @@ def train_video_model(
         for x, y in tqdm(dataloader):
             x, y = x.to(device), y.to(device)
             output = model(x)
+            output = output.squeeze(1) # remove channel dimension
             loss = criterion(output, y)
             loss.backward()
             loss = loss.item()
 
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 0.01)
             optimizer.step()
             optimizer.zero_grad()
             if scheduler:
                 scheduler.step(loss)
-            # torch.nn.utils.clip_grad_norm_(model.parameters(), 0.01)
 
             losses.append(loss)
             wandb.log({"loss": loss, "learning_rate": optimizer.param_groups[0]['lr']})
-            if loss < best_loss:
-                best_loss = loss
-                consecutive_epochs_no_improvement = 0
-            else:
-                consecutive_epochs_no_improvement += 1
+            
         epoch_loss = np.mean(losses)
         print(f"Epoch {epoch_idx} loss: {epoch_loss}")
         wandb.log({"epoch_loss": epoch_loss})
+
+        if epoch_loss < best_loss:
+            best_loss = epoch_loss
+            consecutive_epochs_no_improvement = 0
+        else:
+            consecutive_epochs_no_improvement += 1
         
         if epoch_idx % save_every == 0:
             print("TODO")

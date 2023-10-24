@@ -97,3 +97,71 @@ class FrameGenerator(nn.Module):
         x = self.layers(x)
         x = x.view(-1, self.output_size[0], self.output_size[1])
         return x
+
+class PrintShapeLayer(nn.Module):
+    def forward(self, input):
+        print(input.shape)
+        return input
+
+
+class FrameGeneratorCNN(nn.Module):
+    def __init__(self, input_size:int=1, output_size: tuple= (360, 480), dropout=0.15):
+        super(FrameGeneratorCNN, self).__init__()
+        self.input_size = input_size
+        self.output_size = output_size
+        self.dropout = dropout
+
+        self.mlp = nn.Sequential(
+            nn.Linear(self.input_size,  512),
+
+            nn.LeakyReLU(),
+            nn.Dropout(self.dropout),
+            nn.BatchNorm1d(512),
+            
+            nn.Linear(512, 1024),
+            
+            nn.LeakyReLU(),
+            nn.Dropout(self.dropout),
+            nn.BatchNorm1d(1024),
+        ) # we resize the tensor to 32x32 to give into the cnn
+        shape_diff = (
+            512 - self.output_size[0] +1, 
+            512 - self.output_size[1] +1
+        )
+
+        self.cnn = nn.Sequential(
+            nn.ConvTranspose2d(1, 16, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.BatchNorm2d(16),
+            nn.LeakyReLU(),
+            nn.Dropout(self.dropout),
+            # PrintShapeLayer(),
+            # current tensor shape [Batch, 16, 64, 64]
+            nn.ConvTranspose2d(16, 32, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.BatchNorm2d(32),
+            nn.LeakyReLU(),
+            nn.Dropout(self.dropout),
+            # current tensor shape [Batch, 32, 128, 128]
+            # PrintShapeLayer(),
+            nn.ConvTranspose2d(32, 64, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.BatchNorm2d(64),
+            nn.LeakyReLU(),
+            nn.Dropout(self.dropout),
+            # current tensor shape [Batch, 64, 256, 256]
+            # PrintShapeLayer(),
+            nn.ConvTranspose2d(64, 1, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.BatchNorm2d(1),
+            nn.LeakyReLU(),
+            nn.Dropout(self.dropout),
+            # PrintShapeLayer(),
+            nn.Conv2d(1, 1, kernel_size=shape_diff, stride=1, padding=0),
+            nn.BatchNorm2d(1),
+            nn.LeakyReLU(),
+            nn.Dropout(self.dropout),
+        )
+    
+    def forward(self, x):
+        x = self.mlp(x)
+        x = x.view(-1, 1, 32, 32)
+        x = self.cnn(x)
+        return x
+

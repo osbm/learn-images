@@ -1,4 +1,4 @@
-from .models import SimpleMLP, FrameGenerator, SkipConnectionsMLP
+from .models import SimpleMLP, FrameGenerator, SkipConnectionsMLP, FrameGeneratorCNN
 from .feature_extractors import Fourier2DFeatures, FourierFeatures, GaussianFourierFeatures
 from .trainer import train_image_model, train_video_model
 from .datasets import ImageDataset, VideoDataset
