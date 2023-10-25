@@ -7,7 +7,7 @@ setup(
     description='Module containing my experiments',
     long_description=open('README.md').read(),
     packages=find_packages(exclude=['scripts']),
-    install_requires=['numpy', 'matplotlib', 'scipy', 'sklearn', 'pandas', "torch"],
+    install_requires=['numpy', 'matplotlib', 'scipy', 'pandas', "torch"],
     author='Osman Bayram',
     author_email="osmanfbayram@gmail.com",
 )
