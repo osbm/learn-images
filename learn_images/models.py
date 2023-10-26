@@ -163,5 +163,6 @@ class FrameGeneratorCNN(nn.Module):
         x = self.mlp(x)
         x = x.view(-1, 1, 32, 32)
         x = self.cnn(x)
+        x = torch.sigmoid(x)
         return x
 

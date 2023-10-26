@@ -134,7 +134,9 @@ def train_video_model(
     )
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    criterion = torch.nn.MSELoss()
+    # criterion = torch.nn.MSELoss()
+    criterion = torch.nn.BCELoss()
+
 
     os.makedirs(output_folder, exist_ok=True)
 
