@@ -52,7 +52,7 @@ class VideoDataset(torch.utils.data.Dataset):
         image_path = self.images[idx]
         image = load_image(image_path, convert_to=self.convert_to)
         image = image.to(torch.float32)
-
+        image = image / 255.0
 
         input_tensor = idx / self.len
         input_tensor = torch.tensor(input_tensor, dtype=torch.float32)
