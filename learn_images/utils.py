@@ -108,3 +108,12 @@ def save_features_to_folder(tensor: torch.Tensor, output_folder: str="data/fouri
             image,
             cmap="gray",
         )
+
+def get_model_size(model=None):
+    total = 0
+    for p in model.parameters():
+        if p.requires_grad:
+            total += p.numel() * p.element_size()
+
+    return total
+    
