@@ -141,7 +141,8 @@ def train_video_model(
     os.makedirs(output_folder, exist_ok=True)
 
     dataset = VideoDataset(images_folder=frames_folder_path, convert_to="L")
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    num_images = len(dataset)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
     best_loss = float('inf')
     consecutive_epochs_no_improvement = 0
@@ -179,9 +180,21 @@ def train_video_model(
         else:
             consecutive_epochs_no_improvement += 1
         
-        if epoch_idx % save_every == 0:
-            print("TODO")
-            
+        if epoch_idx % save_every == 0 and epoch_idx > 0 and False:
+            linear_space = torch.linspace(0, 1, num_images)
+            linear_space = linear_space.to(device)
+            # split into batches
+            linear_space = torch.split(linear_space, batch_size)
+            os.makedirs(f"{output_folder}/{epoch_idx}_save", exist_ok=True)
+            for idx, batch in enumerate(linear_space):
+                output = model(batch)
+                output = output.detach().cpu().squeeze(1)
+                output = output * 255
+                output = output.to(torch.uint8)
+                for frame_idx, frame in enumerate(output):
+                    frame = Image.fromarray(frame.numpy())
+                    frame.save(f"{output_folder}/{epoch_idx}_save/{idx * batch_size + frame_idx}.png")
+
 
         if consecutive_epochs_no_improvement >= max_consecutive_epochs_no_improvement:
             print(f"Stopping early as loss hasn't improved for {max_consecutive_epochs_no_improvement} consecutive epochs.")

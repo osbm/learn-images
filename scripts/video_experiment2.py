@@ -26,5 +26,5 @@ train_video_model(
     save_every=5,
     seed=42,
     batch_size=2,
-    disable_wandb=True,
+    disable_wandb=False,
 )
